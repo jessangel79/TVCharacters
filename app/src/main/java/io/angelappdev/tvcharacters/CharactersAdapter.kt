@@ -7,30 +7,60 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import io.realm.Realm
+import io.realm.RealmResults
+import io.realm.kotlin.where
 import kotlinx.android.synthetic.main.cell_character.view.*
 
 class CharactersAdapter : RecyclerView.Adapter<CharactersAdapter.CharacterViewholder>() {
+    val _characterList: RealmResults<Character>
+    init {
+        val realm = Realm.getDefaultInstance()
+//        _characterList = realm.where<Character>().sort("show").findAll()
+        _characterList = realm.where(Character::class.java).sort("show").findAll()
+        if (_characterList.size == 0) {
+            val initialCharacterList = arrayOf(Character("Richard Hendricks", "Silicon Valley"),
+                Character("Jared Dunn", "Silicon Valley"),
+                Character("Will MacAvoy", "The Newsroom"),
+                Character("Mackenzie MacHale", "The Newsroom"),
+                Character("Jim Harper", "The Newsroom"),
+                Character("Ross Geller", "Friends"),
+                Character("Monica Geller", "Friends"),
+                Character("Joey Tribbiani", "Friends"),
+                Character("Chandler Bing", "Friends"),
+                Character("Charlie Harper", "Two and a Half Men"),
+                Character("Allan Harper", "Two and a Half Men"),
+                Character("Jake Harper", "Two and a Half Men"))
+            realm.beginTransaction()
+            for (character in initialCharacterList) {
+                realm.copyToRealm(character)
+            }
+            realm.commitTransaction()
+        }
+    }
 
-    private val _characterList = arrayOf(Character("Richard Hendricks", "Silicon Valley"),
-        Character("Jared Dunn", "Silicon Valley"),
-        Character("Will MacAvoy", "The Newsroom"),
-        Character("Mackenzie MacHale", "The Newsroom"),
-        Character("Jim Harper", "The Newsroom"),
-        Character("Ross Geller", "Friends"),
-        Character("Monica Geller", "Friends"),
-        Character("Joey Tribbiani", "Friends"),
-        Character("Chandler Bing", "Friends"),
-        Character("Charlie Harper", "Two and a Half Men"),
-        Character("Allan Harper", "Two and a Half Men"),
-        Character("Jake Harper", "Two and a Half Men"))
+//    private val _characterList = arrayOf(Character("Richard Hendricks", "Silicon Valley"),
+//        Character("Jared Dunn", "Silicon Valley"),
+//        Character("Will MacAvoy", "The Newsroom"),
+//        Character("Mackenzie MacHale", "The Newsroom"),
+//        Character("Jim Harper", "The Newsroom"),
+//        Character("Ross Geller", "Friends"),
+//        Character("Monica Geller", "Friends"),
+//        Character("Joey Tribbiani", "Friends"),
+//        Character("Chandler Bing", "Friends"),
+//        Character("Charlie Harper", "Two and a Half Men"),
+//        Character("Allan Harper", "Two and a Half Men"),
+//        Character("Jake Harper", "Two and a Half Men"))
 
     private val NAME_CHARACTER = "nameCharacter"
     private val SHOW_CHARACTER = "showCharacter"
 
     fun onCharacterClick(index: Int, context: Context) {
         val character = _characterList[index]
-        Toast.makeText(context, character.name, Toast.LENGTH_SHORT).show()
-        selectedCharacterCell(context, character)
+        if (character != null) {
+            Toast.makeText(context, character.name, Toast.LENGTH_SHORT).show()
+            selectedCharacterCell(context, character)
+        }
     }
 
     private fun selectedCharacterCell(context: Context, character: Character) {
@@ -60,7 +90,9 @@ class CharactersAdapter : RecyclerView.Adapter<CharactersAdapter.CharacterViewho
         val character = _characterList[p1]
 
         // 2 - Envoyer les infos du personnage dans le holder
-        p0.fillWithCharacter(character)
+        if (character != null) {
+            p0.fillWithCharacter(character)
+        }
     }
 
     inner class CharacterViewholder(rootView: View) : RecyclerView.ViewHolder(rootView),
